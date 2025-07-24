@@ -1,3 +1,9 @@
+*debug.ipynb
+results/
+.history/
+database/raw
+database/processed
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

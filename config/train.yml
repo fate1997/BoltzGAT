@@ -1,0 +1,31 @@
+desc: test
+
+train:
+  seed: 42
+  num_epochs: 1000
+  lr: 0.001
+  patience: 500
+  save_folder: './results/'
+  device: 'cuda:0'
+  log_interval: 10
+  normalize: False
+  pretrained_path: None
+
+model:
+  name: 'BoltzGAT'
+  input_dim: 70
+  hidden_dim: 64
+  num_energies: 24
+  num_heads: 8
+  num_layers: 2
+  dropout: 0.2
+  return_repr: False
+
+
+data:
+  name: 'viscosity_L'
+  additional_features: []
+  batch_size: 128
+  train_ratio: 0.8
+  replace: False
+  logarithm: True
