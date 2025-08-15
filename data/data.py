@@ -16,7 +16,7 @@ from .featurizer import MoleculeFeaturizer
 
 RAW_DIR = pathlib.Path(__file__).parent.parent / 'database/raw'
 PROCESSED_DIR = pathlib.Path(__file__).parent.parent / 'database/processed'
-AVAILABLE_DATASETS = [
+AVAILABLE_PURE_DATASETS = [
  'thermal_cond_L', 'thermal_cond_G',
  'diffusion_coef_air', 'diffusion_coef_water',
  'delta_Sf', 'delta_Hf', 'delta_Uf', 'delta_Gf', 'delta_Af',
@@ -26,9 +26,10 @@ AVAILABLE_DATASETS = [
  'density',
  'H_vap',
  'surface_tension',
- 'viscosity_mixture', 'BigSolDBv2'
 ]
-
+AVAILABLE_MIXTURE_DATASETS = [
+     'viscosity_mixture', 'BigSolDBv2'
+]
 
 class MolPropData(Data):
     def __init__(self, smiles: str=None):
@@ -65,7 +66,7 @@ class MolPropDataset(Dataset):
         save_dir: pathlib.Path=PROCESSED_DIR
     ):
         
-        if name not in AVAILABLE_DATASETS:
+        if name not in AVAILABLE_PURE_DATASETS:
             raise ValueError(f'{name} is not available in {raw_dir}')
         
         self.data_list = []

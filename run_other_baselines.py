@@ -8,9 +8,7 @@ from torch import nn
 import pathlib
 
 from data.data import AVAILABLE_PURE_DATASETS
-from model.BoltzGAT import BoltzGAT
-from model.GATv2_equation import GATv2EquationModel
-from model.GATv2_concat import GATv2ConcatModel
+from model.repr_models import GIN, PNA, TemperatureModel, GraphTransformer, GAT, GCN
 from train_utils import (EarlyStopping, Normalizer, data2iter, evaluate_score,
                          get_logger, load_config, save_results)
 
@@ -75,16 +73,46 @@ def train(config, logger):
 
     logger.info("------------Model Creating-----------")
     model_name = config.model.name
-    if model_name.lower() == 'GATv2Concat'.lower():
-        model = GATv2ConcatModel(config.model)
-    elif model_name.lower() == 'BoltzGAT'.lower():
-        model = BoltzGAT(config.model)
-    elif model_name.lower() == 'GATv2Equation'.lower():
-        if data_name != 'viscosity_L.pickle':
-            raise ValueError("GATv2Equation model is only for liquid viscosity prediction")
-        model = GATv2EquationModel(config.model)
-    else:
-        raise ValueError(f"Model {model_name} not found")
+    if model_name.lower() == 'gin':
+        repr_model = GIN(
+            num_atom_features=config.model.input_dim,
+            hidden_dim=config.model.hidden_dim,
+            num_layers=config.model.num_layers,
+            dropout=config.model.dropout,
+        )
+    elif model_name.lower() == 'pna':
+        repr_model = PNA(
+            in_channels=config.model.input_dim,
+            hidden_dim=config.model.hidden_dim,
+            num_layers=config.model.num_layers,
+            deg=PNA.compute_deg(train_loader),
+        )
+    elif model_name.lower() == 'gt':
+        repr_model = GraphTransformer(
+            in_channels=config.model.input_dim,
+            hidden_dim=config.model.hidden_dim,
+            num_layers=config.model.num_layers,
+            num_heads=config.model.num_heads,
+        )
+    elif model_name.lower() == 'gat':
+        repr_model = GAT(
+            in_channels=config.model.input_dim,
+            hidden_dim=config.model.hidden_dim,
+            num_layers=config.model.num_layers,
+            num_heads=config.model.num_heads,
+        )
+    elif model_name.lower() == 'gcn':
+        repr_model = GCN(
+            in_channels=config.model.input_dim,
+            hidden_dim=config.model.hidden_dim,
+            num_layers=config.model.num_layers,
+        )
+    model = TemperatureModel(
+        mol_repr_model=repr_model,
+        repr_dim=config.model.hidden_dim * 2,
+        use_boltzmann=config.model.use_boltzmann,
+        num_energies=config.model.num_energies,
+    )
     
     if config.train.pretrained_path:
         model.load_state_dict(torch.load(config.train.pretrained_path))
@@ -147,8 +175,9 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--desc', default='Testing', type=str)
     parser.add_argument('--datasets', nargs='+', required=True)
-    parser.add_argument('--model', default='BoltzGAT', type=str, 
-                        choices=['BoltzGAT', 'GATv2Concat', 'GATv2Equation'])
+    parser.add_argument('--use_boltzmann', action='store_true')
+    parser.add_argument('--model', default='gin', type=str, 
+                        choices=['gin', 'pna', 'gt', 'gat', 'gcn'])
     parser.add_argument('--pretrained_path', default=None, type=str)
     parser.add_argument('--replace', action='store_true')
     parser.add_argument('--lr', default=0.001, type=float)
@@ -173,6 +202,7 @@ if __name__ == '__main__':
         config.data.name = dataset
         config.data.replace = args.replace
         config.model.name = args.model
+        config.model.use_boltzmann = args.use_boltzmann
         config.train.pretrained_path = args.pretrained_path
         config.train.lr = args.lr
         
