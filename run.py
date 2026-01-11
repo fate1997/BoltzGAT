@@ -61,7 +61,8 @@ def train(config, logger):
         train_ratio,
         additional_features, 
         replace, 
-        logarithm
+        logarithm,
+        seed
     )
 
     # Training init
@@ -152,6 +153,7 @@ if __name__ == '__main__':
     parser.add_argument('--pretrained_path', default=None, type=str)
     parser.add_argument('--replace', action='store_true')
     parser.add_argument('--lr', default=0.001, type=float)
+    parser.add_argument('--seed', default=42, type=int)
     args = parser.parse_args()
     
     if args.datasets == ['all']:
@@ -175,6 +177,7 @@ if __name__ == '__main__':
         config.model.name = args.model
         config.train.pretrained_path = args.pretrained_path
         config.train.lr = args.lr
+        config.train.seed = args.seed
         
         if dataset in non_logarithm_datasets:
             config.data.logarithm = False

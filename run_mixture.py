@@ -7,7 +7,7 @@ import torch
 from torch import nn
 import pathlib
 
-from data.data import AVAILABLE_DATASETS
+from data.data import AVAILABLE_MIXTURE_DATASETS
 from model.BoltzGAT_mixture import BoltzGAT4Mixture
 from model.GATv2_concat_mixture import GATv2Concat4Mixture
 from train_utils import (EarlyStopping, Normalizer, mixture2iter, evaluate_score,
@@ -151,7 +151,7 @@ if __name__ == '__main__':
     default_config = config_dir / 'train_mixture.yml'
     log_config_path = config_dir / 'log_config.json'
     
-    assert args.dataset in AVAILABLE_DATASETS, f"Dataset {args.dataset} not found"
+    assert args.dataset in AVAILABLE_MIXTURE_DATASETS, f"Dataset {args.dataset} not found"
         
     config = load_config(default_config)
     config.desc = args.desc

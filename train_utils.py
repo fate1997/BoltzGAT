@@ -98,7 +98,7 @@ def get_logger(name, log_dir, config_path='./configs/log_config.json'):
 
 
 
-def data2iter(name, batch_size, train_ratio, additional_features, replace, logarithm):
+def data2iter(name, batch_size, train_ratio, additional_features, replace, logarithm, seed=42):
     def flatten(data_list):
         flatten_dataset = []
         for j, data in enumerate(data_list):
@@ -113,7 +113,7 @@ def data2iter(name, batch_size, train_ratio, additional_features, replace, logar
     if logarithm:
         dataset.logarithm()
 
-    random.seed(42)
+    random.seed(seed)
     num_points = len(dataset)
     ids = list(range(num_points))
     random.shuffle(ids)
